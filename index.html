@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Natural Earth x OSM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+
+        #map {
+            position: relative;
+        }
+
+        #actionOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            background: hsl(0, 0%, 90%);
+            cursor: pointer;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+    <div id="actionOverlay"></div>
+
+    <script>
+        const map = new maplibregl.Map({
+            container: "map",
+            style: {
+                version: 8,
+                projection: {
+                    "type": "globe"
+                },
+                sources: {
+                    naturalearth: {
+                        type: "raster",
+                        tiles: ["data/naturalearth-tiles/{z}/{x}/{y}.png"],
+                        tileSize: 512,
+                        minzoom: 0,
+                        maxzoom: 3,
+                        attribution: "Natural Earth"
+                    },
+
+                    osm: {
+                        type: "raster",
+                        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+                        tileSize: 256,
+                        minzoom: 3,
+                        maxzoom: 18,
+                        attribution: "\u00a9 OpenStreetMap contributors"
+                    }
+                },
+                layers: [
+                    {
+                        id: "naturalearth-layer",
+                        type: "raster",
+                        source: "naturalearth",
+                        minzoom: 0,
+                        maxzoom: 3
+                    },
+                    {
+                        id: "osm-layer",
+                        type: "raster",
+                        source: "osm",
+                        minzoom: 2,
+                        maxzoom: 18
+                    }
+                ]
+            },
+            center: [0, 20],
+            zoom: 0,
+            maxzoom: 18,
+            hash: true
+        });
+
+        // zoom levels
+        map.on('load', () => {
+            map.setPaintProperty('naturalearth-layer', 'raster-opacity', [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                2, 1,
+                3, 0
+            ]);
+
+            map.setPaintProperty('osm-layer', 'raster-opacity', [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                2, 0,
+                3, 1
+            ]);
+        });
+
+    </script>
+</body>
+
+</html>
